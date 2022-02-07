@@ -1,0 +1,92 @@
+# ***** BEGIN LICENSE BLOCK *****
+# 
+# Copyright (C) 2001-2021 Olof Hagsand
+#
+# This file is part of CLIgen.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Alternatively, the contents of this file may be used under the terms of
+# the GNU General Public License Version 2 or later (the "GPL"),
+# in which case the provisions of the GPL are applicable instead
+# of those above. If you wish to allow use of your version of this file only
+# under the terms of the GPL, and not to allow others to
+# use your version of this file under the terms of Apache License version 2, indicate
+# your decision by deleting the provisions above and replace them with the 
+# notice and other provisions required by the GPL. If you do not delete
+# the provisions above, a recipient may use your version of this file under
+# the terms of any one of the Apache License version 2 or the GPL.
+#
+# ***** END LICENSE BLOCK *****
+
+
+  prompt="cli> ";              # Assignment of prompt
+  comment="#";                 # Same comment as in syntax
+  treename="tutorial";         # Name of syntax (used when referencing)
+
+  hello("Greet the world"){    # 'hello' command with help text
+    world, hello("Hello World!"); # 'world' command with callback
+  }
+  # Nested command using callback arguments to differentiate
+  ip("The IP protocol"){
+	protocol <proto:uint8>("IP protocol id") <ifname:string choice:eth0|eth1>("inteface name"), cb();
+    tcp("The TCP protocol") <port:int32>("Port number"), cb("tcp");
+    udp("The UDP protocol") <addr:ipaddr>("IPv4 address"), cb("udp");
+	sctp("The SCTP protol") <addr:ipaddr>("IPV4 address"),cb("hello");{
+		sport("Source port") <sport:int32>("Source Port number") 
+			dport("Dource port") <dport:int32>("Dource Port number"), cb("sctp"); 
+	}
+  }
+access-list("ACL") permit("permit") <src:ipv4addr show:A.B.C.D>("Source address") <dst:ipv4addr show:A.B.C.D>("Destination address");
+ex <a:int32 show:number>("A number");
+  # Example of commands on several levels
+  aa bb,cb();{              
+    ff,cb();
+  }
+  # Example of variable preferences
+  values (<int32> | <string> | <int64> | aa), cb();
+  # Complex syntax and callback argument handling
+  aa bb (ca("help ca") <int32>|cb("help cb")) [dd|ee], letters();
+  # Expand example
+  interface {
+    <ifname:string interface()>("interface name"),cb(); 
+  }
+  # Example of hidden command
+  secret,hide,secret("message");        
+  # Example of changing prompt
+  change prompt <new:string>("New prompt"),setprompt(); 
+  
+  # Example of sub-tree reference (here recursion).
+  recurse @tutorial;
+
+  # make a translation of the variable by incrementing characters in the string
+  increment <var:string translate:incstr()>, cb();
+
+   # Quit CLI
+  quit("quit the CLI"),quit(); 
+
+  change tree, changetree("tree1");
+
+  add @sub, add();         # Reference of sub-tree with 'add' callback
+  del @sub, del();         # Reference of sub-tree with 'del' callback
+
+  treename="sub";           # Small sub-tree refernced in the main tutorial tree
+  x{
+    y, fn("a");
+  }
+
+  treename="tree1";
+  z{
+      x;
+  }
+  change tree, changetree("tutorial");
